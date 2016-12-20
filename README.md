@@ -55,8 +55,8 @@ $config_directories['sync'] = '../config/sync';
 * $ composer require
 * $ composer update
 
-# Configure the stage-rebuild.sh to your envirement
-# run /deployment/stage-rebuild.sh on stage enviroment
+1. Configure the stage-rebuild.sh to your envirement
+2. Run /deployment/stage-rebuild.sh on stage enviroment
 $ sudo ./stage-rebuild.sh
 # This will do the following
 * set maintance-mode TRUE
@@ -73,8 +73,8 @@ $ sudo ./stage-rebuild.sh
 # Than you have all new changes with the production database and files
 # You can test it!
 
-# Configure the prod-rebuild.sh to your envirement
-# run /deployment/prod-rebuild.sh on production enviroment
+1. Configure the prod-rebuild.sh to your envirement
+2. Run /deployment/prod-rebuild.sh on production enviroment
 $ sudo ./prod-rebuild.sh
 # This will do the following
 * set maintance-mode TRUE
