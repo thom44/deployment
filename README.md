@@ -71,6 +71,7 @@ $ sudo ./stage-rebuild.sh
 * run $ drush config-import to import the configuration changes
 * run some security checks @see stage-rebuild.sh itself
 * set maintance-mode FALSE
+* Logfile is written to deployment/logs/*
 
 # Than you have all new changes with the production database and files
 # You can test it!
