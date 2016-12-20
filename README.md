@@ -21,6 +21,7 @@ $ composer create-project drupal-composer/drupal-project:8.x-dev $DRUPAL_DIR --s
 # You can also configure your config directory for the Drupal configuraton management
 # to the project directory, to get it out of web accessable location
 * /config/sync (chmod 770) 
+
 # To tell Drupal this location, change in settings.php
 $config_directories['sync'] = '../config/sync';
 
@@ -29,6 +30,7 @@ $config_directories['sync'] = '../config/sync';
 * composer.json
 * comoposer.lock
 * custom themes and modules
+
 # We do not deploy 
 * vendor (Libraries)
 * Drupal core
@@ -48,6 +50,7 @@ $config_directories['sync'] = '../config/sync';
 * Make development changes
 * run $ drush config-export
 * git add, commit and push
+
 # For updates on development use
 * $ composer require
 * $ composer update
@@ -66,6 +69,7 @@ $ sudo ./stage-rebuild.sh
 * run $ drush config-import to import the configuration changes
 * run some security checks @see stage-rebuild.sh itself
 * set maintance-mode FALSE
+
 # Than you have all new changes with the production database and files
 # You can test it!
 
@@ -82,6 +86,7 @@ $ sudo ./prod-rebuild.sh
 * run $ drush config-import to import the configuration changes
 * run some security checks @see stage-rebuild.sh itself
 * set maintance-mode FALSE
+
 # Now you should have the same reslult as testet on you stage enviremone.
 # Good look!
 
