@@ -2,7 +2,7 @@
 # This are Drupal 8 rebuild scripts based on a install with composer template
 # Example command 
 $ composer create-project drupal-composer/drupal-project:8.x-dev $DRUPAL_DIR --stability dev --no-interaction
-@see https://github.com/drupal-composer/drupal-project
+* @see https://github.com/drupal-composer/drupal-project
 
 # Structure in your project directory after composer template install
 * /drush
@@ -35,7 +35,7 @@ $config_directories['sync'] = '../config/sync';
 * vendor (Libraries)
 * Drupal core
 * Drupal contrib themes and modules
-@see example.gitignore
+* @see example.gitignore
 
 # Composer handling
 * We run composer update only on development,
@@ -76,10 +76,11 @@ $ sudo ./stage-rebuild.sh
 # You can test it!
 
 # 1. Configure the prod-rebuild.sh to your envirement
-@see prod-rebuild.sh
+* @see prod-rebuild.sh
 
 # 2. Run /deployment/prod-rebuild.sh on production enviroment
 $ sudo ./prod-rebuild.sh
+
 # This will do the following
 * set maintance-mode TRUE
 * Backup the web directory and the current composer.lock file
