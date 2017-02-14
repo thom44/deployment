@@ -93,6 +93,7 @@ $ sudo ./prod-rebuild.sh
 * run some security checks @see stage-rebuild.sh itself
 * set maintance-mode FALSE
 
-# Now you should have the same reslult as testet on you stage enviremone.
+# Now you should have the same result as testet on you stage enviremone.
 # Good look!
+
 

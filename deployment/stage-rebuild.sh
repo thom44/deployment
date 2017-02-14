@@ -2,33 +2,20 @@
 # DRUPAL 8 STAGE REBUILD SCRIPT #
 ##################################
 
-# Run this script as sudo
+# You may run this script as sudo to change file owner
 # sudo ./stage-rebuild.sh
 
-# Define the PRODUCTION database
-DB_PROD=production-db-name
+# Production drush alias
+PROD_ALIAS=@deploy.prod
 
-# Define the STAGE database
-# !!! THIS DATABASE WILL BE DELETET DURING REBUILD !!!
-DB_STAGE=stage-db-name
+# Stage drush alias
+STAGE_ALIAS=@deploy.stage
 
-# Database Character set
-CHARACTER=utf8
-COLLATE=utf8_general_ci
-#CHARACTER=utf8mb4
-#COLLATE=utf8mb4_general_ci
+# Set filesystem user:group according your server configuration
+DRUPAL_USER=thom
+DRUPAL_GROUP=www-data
 
-# Server Database
-# ! This works if stage and prod are at the this server !
-db_user=database-user
-db_password="db-password"
-db_host=localhost
-
-# Set filesystem user:group
-DRUPAL_USER=webfile-owner-username
-DRUPAL_GROUP=webfile-group
-
-# Site Directory - relative from drupal-root
+# Stage site Directory - relative from drupal-root
 SITE_DIR=sites/default
 
 # If you use the following structure, than you don't need to edit below.
@@ -37,7 +24,7 @@ SITE_DIR=sites/default
 # project/.git = location of your git repositority
 # project/dumps = the location where the dumps are saved
 # project/vendor = composer vendor directory
-# porject/composer.json
+# project/composer.json
 
 #**********************************************************************#
 # Checkout absolute project path
@@ -48,10 +35,6 @@ PROJECT_PATH=$(pwd)
 DRUPAL_DIR=web
 
 DRUPAL_ROOT=$PROJECT_PATH/$DRUPAL_DIR
-
-# PROD location Directory
-PROD_LOCATION=/path/to/your/poduction/site/web/sites/default
-PROD_FILES=$PROD_LOCATION/files
 
 #---------- do not edit below ------------
 # simple prompt
@@ -92,31 +75,19 @@ echo "Time is $now"   2>&1 | tee -a $logfile
 echo "Drupal Root is $DRUPAL_ROOT"  2>&1 | tee -a $logfile
 echo "Logfile is $logfile"
 
-# Change to Drupal root directory
-cd $DRUPAL_ROOT;
-
 # Set Page to Maintenance Mode
-drush sset system.maintenance_mode TRUE 2>&1 | tee -a $logfile
+drush $STAGE_ALIAS sset system.maintenance_mode TRUE 2>&1 | tee -a $logfile
 
+echo "drush sql-sync $PROD_ALIAS $STAGE_ALIAS"
 if prompt_yes_no "Do you want to DESTROY DATABASE $DB_STAGE AND REPLACE IT WITH $DB_PROD" ; then
 
-  mysqldump --user=$db_user --host=$db_host --password=$db_password $DB_PROD > $PROJECT_PATH/dumps/tmp_"$DB_PROD"_$now.sql 2>&1 | tee -a $logfile
+  if prompt_yes_no "Do you want to backup the Stage Database" ; then
+    drush $STAGE_ALIAS sql-dump --result-file=$PROJECT_PATH/dumps/stage-$now.sql
+  fi
 
-  mysqldump --user=$db_user --host=$db_host --password=$db_password $DB_STAGE > $PROJECT_PATH/dumps/dump_bevor_rebuild_"$DB_STAGE"_$now.sql 2>&1 | tee -a $logfile
-
-  chmod 400 $PROJECT_PATH/dumps/dump_bevor_rebuild_"$DB_STAGE"_$now.sql 2>&1 | tee -a $logfile
-
-  mysqladmin --user=$db_user --host=$db_host --password=$db_password DROP $DB_STAGE; 2>&1 | tee -a $logfile
-
-  # Create Database
-  mysql --user=$db_user --host=$db_host --password=$db_password -Bse "CREATE DATABASE IF NOT EXISTS $DB_STAGE CHARACTER SET $CHARACTER COLLATE $COLLATE;" 2>&1 | tee -a $logfile
-
-  mysql --user=$db_user --host=$db_host --password=$db_password $DB_STAGE < ../dumps/tmp_"$DB_PROD"_$now.sql 2>&1 | tee -a $logfile
-
-  chmod 400 $PROJECT_PATH/dumps/tmp_"$DB_PROD"_$now.sql 2>&1 | tee -a $logfile
+  drush sql-sync $PROD_ALIAS $STAGE_ALIAS 2>&1 | tee -a $logfile
 
 fi
-
 
 if prompt_yes_no "Do you want to PULL THE GIT REPOSITORY" ; then
   
@@ -128,27 +99,23 @@ if prompt_yes_no "Do you want to PULL THE GIT REPOSITORY" ; then
 
   composer install 2>&1 | tee -a $logfile
 
-  cd $DRUPAL_ROOT;
-
-  drush updb 2>&1 | tee -a $logfile
+  drush $STAGE_ALIAS updb 2>&1 | tee -a $logfile
 
 fi
 
 
 if prompt_yes_no "Do you want to IMPORT CONFIGURATION" ; then
   
-  drush config-import 2>&1 | tee -a $logfile
+  drush $STAGE_ALIAS config-import 2>&1 | tee -a $logfile
 
 fi
 
 echo "Producton files directory"
-echo $PROD_FILES;
-echo "rsync -av  --exclude=php,css,js $PROD_LOCATION/files/ $DRUPAL_ROOT/$SITE_DIR/files"
 
 if prompt_yes_no "Do you want to DESTROY STAGE FILES DIR AND REPLACE IT WITH PROD FILES DIR" ; then
 
-  rsync -av --exclude=php,css,js $PROD_LOCATION/files/ $DRUPAL_ROOT/$SITE_DIR/files
-
+  drush rsync $PROD_ALIAS:%files/ $STAGE_ALIAS:%files
+  # fix user:group if nessersary
   chown -R $DRUPAL_USER:$DRUPAL_GROUP $DRUPAL_ROOT/$SITE_DIR/files 2>&1 | tee -a $logfile
 
 fi
@@ -172,14 +139,12 @@ else
      echo ".git/.htaccess file exists already" 2>&1 | tee -a $logfile
 fi
 
-cd $DRUPAL_ROOT;
-
 # Clear all caches
-drush cr 2>&1 | tee -a $logfile
+drush $STAGE_ALIAS cr 2>&1 | tee -a $logfile
 
 if prompt_yes_no "Do you want to SET THE MAINTENANCE_MODE TO ONLINE" ; then
 
-  drush sset system.maintenance_mode FALSE 2>&1 | tee -a $logfile
+  drush $STAGE_ALIAS sset system.maintenance_mode FALSE 2>&1 | tee -a $logfile
 
 fi
 

@@ -2,22 +2,15 @@
 # DRUPAL 8 PROD REBUILD SCRIPT #
 ################################
 
-# You may run this script as sudo
-# to change file owner in line 100
+# You may run this script as sudo to change file owner
 # sudo ./prod-rebuild.sh
 
-# The PRODUCTION database
-DB_PROD=production-db-name
-
-# The database character set
-CHARACTER=utf8
-COLLATE=utf8_general_ci
-#CHARACTER=utf8mb4
-#COLLATE=utf8mb4_general_ci
+# Production drush alias
+PROD_ALIAS=@deploy.prod
 
 # The filesystem user:group
-DRUPAL_USER=webfile-owner-username
-DRUPAL_GROUP=webfile-group
+DRUPAL_USER=thom
+DRUPAL_GROUP=www-data
 
 # Site Directory - relative from drupal-root
 SITE_DIR=sites/default
@@ -80,29 +73,29 @@ echo "Time is $now"   2>&1 | tee -a $logfile
 echo "Drupal Root is $DRUPAL_ROOT"  2>&1 | tee -a $logfile
 echo "Logfile is $logfile"
 
-# Change to Drupal root directory
-cd $DRUPAL_ROOT;
-
 # Set Page to Maintenance Mode
-drush sset system.maintenance_mode TRUE 2>&1 | tee -a $logfile
-
-# Change to project path
-cd $PROJECT_PATH;
+drush $PROD_ALIAS sset system.maintenance_mode TRUE 2>&1 | tee -a $logfile
 
 if prompt_yes_no "Do you want to backup /web and composer.lock" ; then
 
   # Backup /web and /vendor directories before pull and composer install
   echo "Start Backup code: tar -czf dumps/prod-before-rebuild-$now.tgz $DRUPAL_ROOT composer.lock"  2>&1 | tee -a $logfile
   tar -czf $PROJECT_PATH/dumps/prod-before-rebuild-$now.tgz $DRUPAL_ROOT composer.lock  2>&1 | tee -a $logfile
-
+  # Protect backup
   chmod 400 $PROJECT_PATH/dumps/prod-before-rebuild-$now.tgz  2>&1 | tee -a $logfile
-
   echo "Code Backup completed"
 
 fi
 
+echo "Running drush $PROD_ALIAS sql-dump --result-file=$PROJECT_PATH/dumps/"$DB_PROD"_$now.sql "
+drush $PROD_ALIAS sql-dump --result-file=$PROJECT_PATH/dumps/prod_$now.sql 2>&1 | tee -a $logfile
+# Protect dump file
+chmod 400 $PROJECT_PATH/dumps/prod_$now.sql
+echo "sql-dump completet"
 
 if prompt_yes_no "Do you want to PULL THE GIT REPOSITORY" ; then
+
+  cd $PROJECT_PATH;
 
   git pull origin master 2>&1 | tee -a $logfile
 
@@ -110,27 +103,17 @@ if prompt_yes_no "Do you want to PULL THE GIT REPOSITORY" ; then
 
   composer install 2>&1 | tee -a $logfile
 
-  cd $DRUPAL_ROOT;
-
-  drush updb 2>&1 | tee -a $logfile
+  drush $PROD_ALIAS updb 2>&1 | tee -a $logfile
 
 fi
-
-echo "drush sql-dump --result-file=$PROJECT_PATH/dumps/$DB_PROD_$now.sql"
 
 if prompt_yes_no "Do you want to IMPORT CONFIGURATION" ; then
 
-  drush sql-dump --result-file=$PROJECT_PATH/dumps/"$DB_PROD"_$now.sql 2>&1 | tee -a $logfile
-
-  chmod 400 $PROJECT_PATH/dumps/"$DB_PROD"_$now.sql
-
-  echo "sql-dump completet"
-
-  drush config-import 2>&1 | tee -a $logfile
+  drush $PROD_ALIAS config-import 2>&1 | tee -a $logfile
 
 fi
 
-echo "Make some security check" 2>&1 | tee -a $logfile
+echo "Security check" 2>&1 | tee -a $logfile
 
 # Make shure the config files are protected
 chmod 440 $DRUPAL_ROOT/$SITE_DIR/settings.php 2>&1 | tee -a $logfile
@@ -149,13 +132,11 @@ else
      echo ".git/.htaccess file exists already" 2>&1 | tee -a $logfile
 fi
 
-cd $DRUPAL_ROOT;
-
 # Clear all caches
-drush cr 2>&1 | tee -a $logfile
+drush $PROD_ALIAS cr 2>&1 | tee -a $logfile
 
 if prompt_yes_no "Do you want to SET THE MAINTENANCE_MODE TO ONLINE" ; then
 
-  drush sset system.maintenance_mode FALSE 2>&1 | tee -a $logfile
+  drush $PROD_ALIAS sset system.maintenance_mode FALSE 2>&1 | tee -a $logfile
 
 fi
