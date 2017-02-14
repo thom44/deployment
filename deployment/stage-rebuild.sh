@@ -6,13 +6,15 @@
 # sudo ./stage-rebuild.sh
 
 # Production drush alias
-PROD_ALIAS=@deploy.prod
+# Change mygroup to your projectname
+PROD_ALIAS=@mygroup.prod
 
 # Stage drush alias
-STAGE_ALIAS=@deploy.stage
+# Change mygroup to your projectname
+STAGE_ALIAS=@mygroup.stage
 
 # Set filesystem user:group according your server configuration
-DRUPAL_USER=thom
+DRUPAL_USER=root
 DRUPAL_GROUP=www-data
 
 # Stage site Directory - relative from drupal-root

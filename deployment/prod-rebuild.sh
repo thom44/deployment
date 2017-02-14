@@ -6,10 +6,10 @@
 # sudo ./prod-rebuild.sh
 
 # Production drush alias
-PROD_ALIAS=@deploy.prod
+PROD_ALIAS=@mygroup.prod
 
 # The filesystem user:group
-DRUPAL_USER=thom
+DRUPAL_USER=root
 DRUPAL_GROUP=www-data
 
 # Site Directory - relative from drupal-root

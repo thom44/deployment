@@ -1,7 +1,8 @@
 <?php
 /**
  * @file 
- * Drush alias file example
+ * Drush alias file example with minimal configuration
+ *   this is all you need for the rebuild-scripts are working
  * @Todo
  *   1. Rename this file and change "mygroup" to your projectname
  *   2. Change the 'uri' and 'root' values
