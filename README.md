@@ -25,6 +25,12 @@ $ composer create-project drupal-composer/drupal-project:8.x-dev $DRUPAL_DIR --s
 # To tell Drupal this location, change in settings.php
 $config_directories['sync'] = '../config/sync';
 
+# Rename mygroup.aliases.drushrc.php
+* use your projectname instead of mygroup
+* Change the path-values 'uri' and 'root' 
+* Move the file to the location of your drush configuration
+*   for example /etc/drush
+
 # --- The Concept --- #
 # We deploy the following
 * composer.json
